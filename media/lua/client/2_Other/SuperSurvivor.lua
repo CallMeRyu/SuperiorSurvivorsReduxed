@@ -956,7 +956,9 @@ end
 function SuperSurvivor:DebugSay(text)
 
 	if(DebugSayEnabled or self.DebugMode) then
-		print(text)
+		print("-----------------------------------------------------")
+		print((os.date ("%c")).." - "..text)
+		print("-----------------------------------------------------")
 		self:Speak(text)
 	end
 end
@@ -1269,6 +1271,15 @@ function SuperSurvivor:isInSameRoom(movingObj)
 	if(selfSquare:getRoom() == objSquare:getRoom()) then return true
 	else return false end
 end 
+function SuperSurvivor:isInSameRoomWithEnemyAlt()
+	if (self.LastEnemeySeen ~= nil) then
+		if (self:isInSameRoom(self.LastEnemeySeen)) then
+			return true
+		else 
+			return false 
+		end
+	end
+end  
 
 function SuperSurvivor:isInSameBuilding(movingObj)
 	if not movingObj then return false end
@@ -1283,7 +1294,16 @@ function SuperSurvivor:isInSameBuilding(movingObj)
 	
 	return false 
 end
-
+-- An easiser function to make InBuildingWithEntity returns
+function SuperSurvivor:isInSameBuildingWithEnemyAlt()
+	if (self.LastEnemeySeen ~= nil) then
+		if (self:isInSameBuilding(self.LastEnemeySeen)) then
+			return true
+		else 
+			return false 
+		end
+	end
+end														   
 function SuperSurvivor:getAttackRange()
 			 
 	return self.AttackRange 
@@ -1434,7 +1454,7 @@ function SuperSurvivor:walkTo(square)
 	end
 	if adjacent ~= nil then
 		local door = self:inFrontOfDoor()
-		if (door ~= nil) and (door:isLocked() or door:isLockedByKey()) then
+		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
 			local building = door:getOppositeSquare():getBuilding()
 			--if (builing == nil) or (not self.parent:isTargetBuildingClaimed(builing)) then
 				self:DebugSay("little pig, little pig")
@@ -1505,7 +1525,7 @@ function SuperSurvivor:inFrontOfLockedDoor()
 
 	local door = self:inFrontOfDoor()
 			
-	if (door ~= nil) and (door:isLocked() or door:isLockedByKey())  then
+	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
 		return true
 	else 
 		return false
@@ -1538,6 +1558,57 @@ function SuperSurvivor:inFrontOfWindow()
 	 else return nil end
 	
 end
+
+-- since inFrontOfWindow (not alt) doesn't have this function's code
+function SuperSurvivor:inFrontOfWindowAlt() 
+
+	 local cs = self.player:getCurrentSquare()
+	 local osquare = GetAdjSquare(cs,"N")
+	 if cs and osquare and cs:getWindowTo(osquare) then return cs:getWindowTo(osquare) end
+	 
+	 osquare = GetAdjSquare(cs,"E")
+	 if cs and osquare and cs:getWindowTo(osquare) then return cs:getWindowTo(osquare) end
+	 
+	 osquare = GetAdjSquare(cs,"S")
+	 if cs and osquare and cs:getWindowTo(osquare) then return cs:getWindowTo(osquare) end
+	 
+	 osquare = GetAdjSquare(cs,"W")
+	 if cs and osquare and cs:getWindowTo(osquare) then return cs:getWindowTo(osquare) end
+	 
+	 return nil 
+ 
+end
+function SuperSurvivor:inFrontOfBarricadedWindowAlt()
+-- Used door locked code for this, added 'alt' to function name just to be safe for naming
+	local window = self:inFrontOfWindowAlt()
+
+	if (window ~= nil) and (window:isBarricaded()) then
+		return true
+	else 
+		return false
+	end
+end
+function SuperSurvivor:inFrontOfWindowAndIsOutsideAlt()
+-- Used door locked code for this, added 'alt' to function name just to be safe for naming
+	local window = self:inFrontOfWindowAlt()
+
+	if (window ~= nil) and (self.player:isOutside()) then
+		return true
+	else 
+		return false
+	end
+end
+function SuperSurvivor:inFrontOfBarricadedWindowAndIsOutsideAlt()
+-- Used door locked code for this, added 'alt' to function name just to be safe for naming
+	local window = self:inFrontOfWindowAlt()
+
+	if (window ~= nil) and (window:isBarricaded()) and (self.player:isOutside()) then
+		return true
+	else 
+		return false
+	end
+end
+
 function SuperSurvivor:inFrontOfStairs()
 
 	local cs = self.player:getCurrentSquare()
