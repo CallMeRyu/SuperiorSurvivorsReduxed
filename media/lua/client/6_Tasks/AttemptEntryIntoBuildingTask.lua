@@ -39,7 +39,7 @@ end
 
 function AttemptEntryIntoBuildingTask:isComplete()
 	if(self.parent:inUnLootedBuilding()) or (self.parent.TargetBuilding == nil) or (self.parent:isInBuilding(self.parent.TargetBuilding)) then 
-		--self.parent:MarkBuildingExplored(self.parent:getBuilding())
+		self.parent:MarkBuildingExplored(self.parent:getBuilding())
 		return true
 	else return false end
 end
@@ -61,13 +61,32 @@ function AttemptEntryIntoBuildingTask:giveUpOnBuilding()
 
 end
 
+-- self.parent:getBuildingExplored(self.parent:getBuilding())
 function AttemptEntryIntoBuildingTask:update()
 	local debugOutput = self.parent.DebugMode
+
 	if(not self:isValid()) then return false end
+
+	
+	if (self.parent:inFrontOfLockedDoor()) then
+		self.parent:Speak("Damnit, the door is blocked off!")
+		self.parent:MarkBuildingExplored(self.parent:getBuilding())
+		self.parent:walkToDirect(outsidesquare)
+		self.TryWindow = true
+	end
+	if (self.parent:inFrontOfBarricadedWindowAlt()) then 
+		self.parent:Speak("Windows are blocked too! Well, there's no point in staying here...")
+		self.parent:MarkBuildingExplored(self.parent:getBuilding())
+		self.parent:walkToDirect(outsidesquare)
+	--	self:giveUpOnBuilding() 
+	end
+	-- Let the rest of the code do whatever, but make it where if the window is at least barricaded, 
+	-- then make it where the npc actually gives up raiding. Otherwise, the npc will break window like normal. 
+	-- But now ^ that code above manages most of the work. 
 	
 	if(self.parent:getSeenCount() == 0) then self.parent:setSneaking(true) end
 	
-	if(self.parent:getDangerSeenCount() > 1) or (self.ClimbThroughWindowAttempts > 12) then 
+	if(self.parent:getDangerSeenCount() > 1) or (self.ClimbThroughWindowAttempts > 4) then 
 		print("gave up on building because: (self.ClimbThroughWindowAttempts > 12) or seen zombie close:"..tostring(self.ClimbThroughWindowAttempts))
 		self:giveUpOnBuilding() 
 	end
@@ -80,7 +99,7 @@ function AttemptEntryIntoBuildingTask:update()
 		
 			local door = self.parent:inFrontOfDoor()
 			
-			if self.TryWindow == false and (door ~= nil) and (door:isLocked() or door:isLockedByKey())  then
+			if self.TryWindow == false and (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
 				--if (not self.parent:isTargetBuildingClaimed(self.parent.TargetBuilding)) then
 				--	-- little pig, little pig
 				--	door:setIsLocked(false)
@@ -102,6 +121,7 @@ function AttemptEntryIntoBuildingTask:update()
 					if(debugOutput) then print( self.parent:getName() .. " " .."trying to get to square inside") end
 				if(debugOutput) then 	self.parent:Speak(tostring(self.parent:getWalkToAttempt(self.TargetSquare))) end
 					self.parent:walkTo(self.TargetSquare)
+					self.parent:Speak("Trying Window!")
 				else
 					self.TryWindow = true
 				end
@@ -123,6 +143,7 @@ function AttemptEntryIntoBuildingTask:update()
 					else
 						self:giveUpOnBuilding()
 						print("gave up on building because: no window found to try in enter through")
+						self.parent.player:Say("gave up on building because: no window found to try in enter through")
 					end
 					
 				else

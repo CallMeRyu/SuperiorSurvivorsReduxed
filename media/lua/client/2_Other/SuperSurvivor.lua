@@ -1519,19 +1519,6 @@ function SuperSurvivor:WalkToPoint(tx, ty, tz)
   end
 
 
-
-
-function SuperSurvivor:inFrontOfLockedDoor()
-
-	local door = self:inFrontOfDoor()
-			
-	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
-		return true
-	else 
-		return false
-	end
-	
-end
 function SuperSurvivor:inFrontOfDoor()
 
 	 local cs = self.player:getCurrentSquare()
@@ -1550,6 +1537,34 @@ function SuperSurvivor:inFrontOfDoor()
 	 return nil 
 	
 end
+function SuperSurvivor:inFrontOfLockedDoor()
+
+	local door = self:inFrontOfDoor()
+			
+	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
+		return true
+	else 
+		return false
+	end
+	
+end
+function SuperSurvivor:inFrontOfLockedDoorAndIsOutside()
+
+	local door = self:inFrontOfDoor()
+
+	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (self.player:isOutside()) then
+		return true
+	else 
+		return false
+	end
+end
+
+
+
+
+
+
+
 function SuperSurvivor:inFrontOfWindow()
 
 	 local cs = self.player:getCurrentSquare()
@@ -1607,6 +1622,17 @@ function SuperSurvivor:inFrontOfBarricadedWindowAndIsOutsideAlt()
 	else 
 		return false
 	end
+end
+function SuperSurvivor:NPC_inFrontOfUnBarricadedWindowOutside()
+	-- Is the NPC front of an UNbarricaded window AND is the NPC outside?
+	local window = self:inFrontOfWindowAlt()
+
+	if (window ~= nil) and (not window:isBarricaded()) and (self.player:isOutside()) then
+		return true
+	else 
+		return false
+	end
+	self:DebugSay("NPC In front of Unbarricaded Window Outside: Window is barricaded("..tostring(window:isBarricaded())..") and Is outside("..tostring(self.player:isOutside())..")")
 end
 
 function SuperSurvivor:inFrontOfStairs()
@@ -2750,7 +2776,7 @@ function SuperSurvivor:NPC_MovementManagement()
 				self:walkToDirect(cs) 
 			end	
 		end
- 		-- self:getTaskManager():AddToTop(PursueTask:new(self,victim))
+
 		-- Sprinting Calculation while also checking distance > minrange 
 		if (RealDistance >= minrange + 1.25) and (self:getTaskManager():getCurrentTask() == "Attack") and (self:getTaskManager():getCurrentTask() ~= "Pursue") then
 			self:setRunning(true)
@@ -2807,10 +2833,12 @@ function SuperSurvivor:NPC_Attack(victim) -- New Function
 	end
 	
 	-- Movement Management 
-	self:NPC_MovementManagement() -- That way npcs will see if they need to get closer or not
+	-- So far, this isn't needed, since attacktask is managing this.
+	-- self:NPC_MovementManagement() -- That way npcs will see if they need to get closer or not
 
 	-- Hitting the entity in question
-	if((RealDistance <= minrange) or (RealDistance <= 0.65)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
+--	if((RealDistance <= minrange) or (RealDistance <= 0.65)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
+	if((RealDistance <= minrange)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
 		victim:Hit(weapon, self.player, damage, false, 1.0, false)
 		self.AtkTicks = 3
 	end	

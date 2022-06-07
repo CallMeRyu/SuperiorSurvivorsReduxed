@@ -78,8 +78,8 @@ function PursueTask:update()
 		
 		if(self.TargetSS) and (self.TargetSS:getBuilding()~= nil) then self.parent.TargetBuilding = self.TargetSS:getBuilding() end
 		
-		
-		if(theDistance > 6) then self.parent:setRunning(true) 
+		-- set from 6 to 3
+		if(theDistance > 3) then self.parent:setRunning(true) 
 		else self.parent:setRunning(false) end
 		
 		
