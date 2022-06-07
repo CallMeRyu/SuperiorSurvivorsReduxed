@@ -75,12 +75,17 @@ function AIManager(TaskMangerIn)
 	end
 
 	-- Is NPC stuck in front of a locked door outside? Let's fix that (also 'Enter New Building' is attemptentryintobuildingtask)
-	if (TaskMangerIn:getCurrentTask() ~= "Enter New Building") and (ASuperSurvivor:inFrontOfLockedDoorAndIsOutside()) then
+	--	if (TaskMangerIn:getCurrentTask() ~= "Enter New Building") and (ASuperSurvivor:inFrontOfLockedDoorAndIsOutside()) then
+	if ASuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding() and (ASuperSurvivor:inFrontOfLockedDoor()) then
 		if (ASuperSurvivor.TargetBuilding ~= nil) then 
-			ASuperSurvivor.TargetBuilding = ASuperSurvivor:getBuilding()	
+				ASuperSurvivor.TargetBuilding = ASuperSurvivor:getBuilding()	
 		end
-		ASuperSurvivor:DebugSay("You thought you outsmarted me, huh?")
-		TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
+			if (ASuperSurvivor:NPC_IsOutside()) then
+				TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
+			end
+			TaskMangerIn:AddToTop(FindBuildingTask:new(ASuperSurvivor))
+			ASuperSurvivor:DebugSay("You thought you outsmarted me, huh? Task: "..tostring(ASuperSurvivor:getTaskManager():getCurrentTask()))
+			-- This *seems* to work. After finding new building, it will attempt new entry?
 	end
 	
 	if ((TaskMangerIn:getCurrentTask() ~= "Attack") and (TaskMangerIn:getCurrentTask() ~= "Threaten") and not ((TaskMangerIn:getCurrentTask() == "Surender") and EnemyIsSurvivor) and (TaskMangerIn:getCurrentTask() ~= "Doctor") and (ASuperSurvivor:isInSameRoom(ASuperSurvivor.LastEnemeySeen)) and (TaskMangerIn:getCurrentTask() ~= "Flee")) and ((ASuperSurvivor:hasWeapon() and ((ASuperSurvivor:getDangerSeenCount() >= 1) or (ASuperSurvivor:isEnemyInRange(ASuperSurvivor.LastEnemeySeen)))) or (ASuperSurvivor:hasWeapon() == false and (ASuperSurvivor:getDangerSeenCount() == 1) and (not EnemyIsSurvivor))) and (IHaveInjury == false) then

@@ -1456,12 +1456,12 @@ function SuperSurvivor:walkTo(square)
 		local door = self:inFrontOfDoor()
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
 			local building = door:getOppositeSquare():getBuilding()
-			--if (builing == nil) or (not self.parent:isTargetBuildingClaimed(builing)) then
 				self:DebugSay("little pig, little pig")
-			--	door:setIsLocked(false)
-			--	door:setLockedByKey(false)
-			--end
-		end
+				if (self:NPC_TaskCheck_EnterLeaveBuilding())then
+					self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+					self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+				end
+	end
 		
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
@@ -1518,6 +1518,13 @@ function SuperSurvivor:WalkToPoint(tx, ty, tz)
         
   end
 
+function SuperSurvivor:NPC_IsOutside()
+	if self.player:isOutside() then
+		return true
+	else
+		return false
+	end
+end
 
 function SuperSurvivor:inFrontOfDoor()
 
@@ -1558,11 +1565,27 @@ function SuperSurvivor:inFrontOfLockedDoorAndIsOutside()
 		return false
 	end
 end
+function SuperSurvivor:inFrontOfLockedDoorAndIsInside()
 
+	local door = self:inFrontOfDoor()
 
+	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not self.player:isOutside()) then
+		return true
+	else 
+		return false
+	end
+end
+function SuperSurvivor:inFrontOfBarricadedDoor()
 
-
-
+	local door = self:inFrontOfDoor()
+			
+	if (door ~= nil) and (door:isBarricaded())  then
+		return true
+	else 
+		return false
+	end
+	
+end
 
 
 function SuperSurvivor:inFrontOfWindow()
@@ -1634,6 +1657,35 @@ function SuperSurvivor:NPC_inFrontOfUnBarricadedWindowOutside()
 	end
 	self:DebugSay("NPC In front of Unbarricaded Window Outside: Window is barricaded("..tostring(window:isBarricaded())..") and Is outside("..tostring(self.player:isOutside())..")")
 end
+
+
+-- Function List for checking specific scenarios of NPC tasks
+	-- This one is for if the NPC is trying to get out or inside a building but can not
+	-- This **should** be the complete list of tasks that would get an npc stuck
+function SuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding()
+	if
+		(self:getTaskManager():getCurrentTask() ~= "Enter New Building") and			-- AttemptEntryIntoBuildingTask
+		 (
+			(self:getTaskManager():getCurrentTask() == "Find New Building") or			-- FindUnlootedBuildingTask
+			(self:getTaskManager():getCurrentTask() == "Flee From Spot") or
+			(self:getTaskManager():getCurrentTask() == "Wander In Area") or
+			(self:getTaskManager():getCurrentTask() == "Wander In Base") or
+			(self:getTaskManager():getCurrentTask() == "Loot Category") or
+			(self:getTaskManager():getCurrentTask() == "Find Building") or
+			(self:getTaskManager():getCurrentTask() == "Threaten") or
+			(self:getTaskManager():getCurrentTask() == "Attack") or
+			(self:getTaskManager():getCurrentTask() == "Pursue") or
+			(self:getTaskManager():getCurrentTask() == "Wander") or
+			(self:getTaskManager():getCurrentTask() == "Flee")
+		 )
+	then
+		return true
+	else
+		return false
+	end
+	
+end
+
 
 function SuperSurvivor:inFrontOfStairs()
 
