@@ -76,22 +76,25 @@ function AIManager(TaskMangerIn)
 
 	-- Is NPC stuck in front of a locked door outside? Let's fix that (also 'Enter New Building' is attemptentryintobuildingtask)
 	--	if (TaskMangerIn:getCurrentTask() ~= "Enter New Building") and (ASuperSurvivor:inFrontOfLockedDoorAndIsOutside()) then
-	if ASuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding() and (ASuperSurvivor:inFrontOfLockedDoor()) then
-		if (ASuperSurvivor.TargetBuilding ~= nil) then 
-				ASuperSurvivor.TargetBuilding = ASuperSurvivor:getBuilding()	
-		end
-			if (ASuperSurvivor:NPC_IsOutside()) then
-				TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
-			end
-			TaskMangerIn:AddToTop(FindBuildingTask:new(ASuperSurvivor))
-			ASuperSurvivor:DebugSay("You thought you outsmarted me, huh? Task: "..tostring(ASuperSurvivor:getTaskManager():getCurrentTask()))
-			-- This *seems* to work. After finding new building, it will attempt new entry?
-	end
+--	if ASuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding() and (ASuperSurvivor:inFrontOfLockedDoor()) then
+--		if (ASuperSurvivor.TargetBuilding ~= nil) then 
+--				ASuperSurvivor.TargetBuilding = ASuperSurvivor:getBuilding()	
+--		
+--				ASuperSurvivor:DebugSay("You thought you outsmarted me, huh?")
+--				if (ASuperSurvivor:NPC_IsOutside()) then
+--					TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
+--				end
+--				--TaskMangerIn:AddToTop(FindBuildingTask:new(ASuperSurvivor))
+--				-- This *seems* to work. After finding new building, it will attempt new entry?
+--		end
+--	end
 	
 	if ((TaskMangerIn:getCurrentTask() ~= "Attack") and (TaskMangerIn:getCurrentTask() ~= "Threaten") and not ((TaskMangerIn:getCurrentTask() == "Surender") and EnemyIsSurvivor) and (TaskMangerIn:getCurrentTask() ~= "Doctor") and (ASuperSurvivor:isInSameRoom(ASuperSurvivor.LastEnemeySeen)) and (TaskMangerIn:getCurrentTask() ~= "Flee")) and ((ASuperSurvivor:hasWeapon() and ((ASuperSurvivor:getDangerSeenCount() >= 1) or (ASuperSurvivor:isEnemyInRange(ASuperSurvivor.LastEnemeySeen)))) or (ASuperSurvivor:hasWeapon() == false and (ASuperSurvivor:getDangerSeenCount() == 1) and (not EnemyIsSurvivor))) and (IHaveInjury == false) then
-		--ASuperSurvivor:Speak( ASuperSurvivor:getName()..": need to attack")
-		if(ASuperSurvivor.player ~= nil) and (ASuperSurvivor.player:getModData().isRobber) and (not ASuperSurvivor.player:getModData().hitByCharacter) and EnemyIsSurvivor and (not EnemySuperSurvivor.player:getModData().dealBreaker) then TaskMangerIn:AddToTop(ThreatenTask:new(ASuperSurvivor,EnemySuperSurvivor,"Scram"))
-		else TaskMangerIn:AddToTop(AttackTask:new(ASuperSurvivor)) end
+		if(ASuperSurvivor.player ~= nil) and (ASuperSurvivor.player:getModData().isRobber) and (not ASuperSurvivor.player:getModData().hitByCharacter) and EnemyIsSurvivor and (not EnemySuperSurvivor.player:getModData().dealBreaker) and (not ASuperSurvivor:inFrontOfLockedDoor())  then 
+			TaskMangerIn:AddToTop(ThreatenTask:new(ASuperSurvivor,EnemySuperSurvivor,"Scram"))
+		else 
+			TaskMangerIn:AddToTop(AttackTask:new(ASuperSurvivor)) 
+		end
 	end
 	-- find safe place if injured and enemies near
 	if (TaskMangerIn:getCurrentTask() ~= "Find Building") and (TaskMangerIn:getCurrentTask() ~= "Flee") and (IHaveInjury) and (ASuperSurvivor:getDangerSeenCount() > 0) then

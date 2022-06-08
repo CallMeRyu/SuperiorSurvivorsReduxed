@@ -1458,8 +1458,8 @@ function SuperSurvivor:walkTo(square)
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
 				if (self:NPC_TaskCheck_EnterLeaveBuilding())then
+					-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 					self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-					self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 				end
 	end
 		

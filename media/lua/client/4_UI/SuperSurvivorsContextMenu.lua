@@ -370,6 +370,7 @@ function DebugCharacterOutput(test,SS)
 	print("isMoving:"..tostring(SS.player:isMoving()))
 	print("isPerformingAnAction:"..tostring(SS:Get():isPerformingAnAction()))
 	print("TaskManagerOutput:")
+	print("-------------------------End of NPC Debug---------------------------------")
 	SS:getTaskManager():Display()
 	--SS:StopWalk()
 end
