@@ -124,6 +124,7 @@ function ThreatenTask:update()
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
 	else
 		self.parent:DebugSay("ThreatenTask:update - something is wrong")
+		return false
 	end
 	
 	
