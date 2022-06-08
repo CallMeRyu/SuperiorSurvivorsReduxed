@@ -2037,7 +2037,6 @@ function SuperSurvivor:update()
 			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
 			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 		end
 	
 end
